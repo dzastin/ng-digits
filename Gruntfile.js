@@ -43,6 +43,7 @@ module.exports = function(grunt) {
         options: {},
         src: [
           '<%= sourceDir %>/**/*Cfg.js ',
+          '<%= sourceDir %>/**/*Helper.js ',
           '<%= sourceDir %>/**/*.js'
         ],
         dest: '<%= distDir %>/<%= pkg.name %>.js'

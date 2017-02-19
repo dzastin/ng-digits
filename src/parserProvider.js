@@ -1,5 +1,6 @@
 angular.module('ng-digits')
-  .provider('ngDigitsParser', [function() {
+  .provider('ngDigitsParser', ['ngDigitsMainHelperProvider', 
+    function(ngDigitsMainHelperProvider) {
 
     /**
      * Parser
@@ -10,10 +11,12 @@ angular.module('ng-digits')
     /**
      * Function passed to $parsers in ngModel
      * @param  {String} inputValue value from DOM
+     * @param {Object} config directive config
+     * 
      * @return {String} value passed to ng-model
      */
-    this.parser = function(inputValue) {
-      return inputValue;
+    this.parser = function(inputValue, config) {
+      return ngDigitsMainHelperProvider.getValueForModel(inputValue, config);
     };
 
     /**

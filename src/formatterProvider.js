@@ -1,26 +1,29 @@
 angular.module('ng-digits')
-  .provider('ngDigitsFormatter', [function() {
+  .provider('ngDigitsFormatter', ['ngDigitsMainHelperProvider',
+    function(ngDigitsMainHelperProvider) {
 
-    /**
-     * Formatter
-     * @type {Object}
-     */
-    var formatter = this;
+      /**
+       * Formatter
+       * @type {Object}
+       */
+      var formatter = this;
 
-    /**
-     * Function passed to $formatters in ngModel
-     * @param  {String} inputValue value from DOM
-     * @return {String} value passed to ng-model
-     */
-    this.formatter = function(inputValue) {
-      return inputValue;
-    };
+      /**
+       * Function passed to $formatters in ngModel
+       * @param  {String} modelValue value from ng-model
+       * @param {Object} config directive config
+       * 
+       * @return {String} value passed to ng-model
+       */
+      this.formatter = function(modelValue, config) {
+        return ngDigitsMainHelperProvider.getStringForInput(modelValue, config);
+      };
 
-    /**
-     * This returns value for factory/service
-     * @return {Object} formatter
-     */
-    this.$get = [function(){
-      return formatter;
-    }];
-  }]);
+      /**
+       * This returns value for factory/service
+       * @return {Object} formatter
+       */
+      this.$get = [function() {
+        return formatter;
+      }];
+    }]);
