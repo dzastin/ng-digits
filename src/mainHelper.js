@@ -12,6 +12,11 @@ angular.module('ng-digits')
       // ensuring, that we have clean string model
       var numberValue = ngDigitsMainHelper.getValueForModel(numberValue, config) + '';
 
+      // ensure, that there won't be strings like "null" or "NaN" in input
+      if(isNaN(numberValue) || numberValue === null || numberValue === '') {
+        return '';
+      }
+
       // adding thousandSeparators
       numberValue = numberValue.replace(/\B(?=(\d{3})+(?!\d))/g, config.thousandsSeparator);
 
@@ -40,6 +45,11 @@ angular.module('ng-digits')
       // parsing to number
       if(config.parseToNumber) {
         numberValue = config.decimalCount > 0 ? parseFloat(numberValue, 10) : parseInt(numberValue, 10);
+      }
+
+      // ensure, that there won't be "NaN" in model
+      if(isNaN(numberValue)) {
+        return null;
       }
 
       return numberValue;
