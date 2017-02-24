@@ -17,8 +17,10 @@ angular.module('ng-digits')
         return '';
       }
 
-      // adding thousandSeparators
-      numberValue = numberValue.replace(/\B(?=(\d{3})+(?!\d))/g, config.thousandsSeparator);
+      // adding thousandSeparators (only for non decimal parts)
+      var numberValueParts = numberValue.split('.');
+      numberValueParts[0] = numberValueParts[0].replace(/\B(?=(\d{3})+(?!\d))/g, config.thousandsSeparator);
+      numberValue = numberValueParts.join('.');
 
       // replacing decimal separators
       numberValue = numberValue.replace(new RegExp(ngDigitsMainHelper.escapeRegex('.'), 'g'), config.decimalSeparator);
@@ -45,6 +47,10 @@ angular.module('ng-digits')
       // parsing to number
       if(config.parseToNumber) {
         numberValue = config.decimalCount > 0 ? parseFloat(numberValue, 10) : parseInt(numberValue, 10);
+
+        // roundind to allowed decimalPlaces
+        var multiplier = Math.pow(10, config.decimalCount);
+        numberValue = Math.round(numberValue * multiplier)/multiplier;
       }
 
       // ensure, that there won't be "NaN" in model

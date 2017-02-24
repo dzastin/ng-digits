@@ -74,8 +74,10 @@ angular.module('ng-digits')
         return '';
       }
 
-      // adding thousandSeparators
-      numberValue = numberValue.replace(/\B(?=(\d{3})+(?!\d))/g, config.thousandsSeparator);
+      // adding thousandSeparators (only for non decimal parts)
+      var numberValueParts = numberValue.split('.');
+      numberValueParts[0] = numberValueParts[0].replace(/\B(?=(\d{3})+(?!\d))/g, config.thousandsSeparator);
+      numberValue = numberValueParts.join('.');
 
       // replacing decimal separators
       numberValue = numberValue.replace(new RegExp(ngDigitsMainHelper.escapeRegex('.'), 'g'), config.decimalSeparator);
@@ -102,6 +104,10 @@ angular.module('ng-digits')
       // parsing to number
       if(config.parseToNumber) {
         numberValue = config.decimalCount > 0 ? parseFloat(numberValue, 10) : parseInt(numberValue, 10);
+
+        // roundind to allowed decimalPlaces
+        var multiplier = Math.pow(10, config.decimalCount);
+        numberValue = Math.round(numberValue * multiplier)/multiplier;
       }
 
       // ensure, that there won't be "NaN" in model
@@ -136,7 +142,7 @@ angular.module('ng-digits')
     // Runs during compile
     return {
       scope: {
-        ngDigitsFormatter: '='
+        ngDigits: '='
       },
       require: 'ngModel',
       restrict: 'A',
@@ -147,8 +153,8 @@ angular.module('ng-digits')
          * @type {Object}
          */
         var config = angular.copy(ngDigitsConfig);
-        if(angular.isObject($scope.ngDigitsFormatter)) {
-          angular.extend(config, $scope.ngDigitsFormatter);
+        if(angular.isObject($scope.ngDigits)) {
+          angular.extend(config, $scope.ngDigits);
         }
 
         /**
@@ -171,10 +177,20 @@ angular.module('ng-digits')
         });
 
         /**
+         * Setting onPaste event handler
+         * @todo
+         */
+        // iElm.on('paste', function(event){
+        //   ngModel.$setViewValue(ngDigitsMainHelper.getStringForInput(ngModel.$viewValue, config));
+        //   ngModel.$render();
+        //   event.preventDefault();
+        // });
+
+        /**
          * Setting onKeyPress event handler
          */
         iElm.on('keypress', function(event){
-          return ngDigitsEventHandler.keyPress(event, config);
+          return ngDigitsEventHandler.keyPress(event, config, ngModel.$viewValue);
         });
       }
     };
@@ -192,18 +208,47 @@ angular.module('ng-digits')
     /**
      * Handling keypress to prevent typing non digit values
      * @param  {Event} event keypress event
+     * @param {Object} config directive config
+     * @param {String} viewValue current value in input
+     * 
      * @return {Boolean}
      */
-    this.keyPress = function(event) {
+    this.keyPress = function(event, config, viewValue) {
       event = event || $windowProvider.$get().event;
       var charCode = angular.isUndefined(event.which) ? event.keyCode : event.which;
       var charStr = String.fromCharCode(charCode);
-      if (!(/\d/.test(charStr))) {
+
+      if (handler._blockFromTyping(charStr, config, viewValue)) {
         event.preventDefault();
         return false;
       }
       return true;
     };
+
+    /**
+     * Returns true, if we should prevent typing specified character
+     * @param  {String} charStr   pressed character
+     * @param {Object} config directive config
+     * @param {String} viewValue current value in input
+     * 
+     * @return {Boolean}
+     */
+    this._blockFromTyping = function(charStr, config, viewValue) {
+      // Is this char proper decimal separator (as set in config, and only one in string)
+      var isAllowedDecimalSeparator = config.decimalCount > 0 && viewValue.indexOf(config.decimalSeparator) === -1 && charStr === config.decimalSeparator;
+
+      if (!isAllowedDecimalSeparator && !(/\d/.test(charStr))) {
+        return true;
+      }
+
+      // do we have a propoer decimal length
+      var viewValueParts = viewValue.split(config.decimalSeparator);
+      if(viewValueParts.length > 1 && viewValueParts[1].length >= config.decimalCount) {
+        return true;
+      }
+
+      return false;
+    }
 
     /**
      * This returns value for factory/service

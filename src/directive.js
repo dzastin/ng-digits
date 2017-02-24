@@ -4,7 +4,7 @@ angular.module('ng-digits')
     // Runs during compile
     return {
       scope: {
-        ngDigitsFormatter: '='
+        ngDigits: '='
       },
       require: 'ngModel',
       restrict: 'A',
@@ -15,8 +15,8 @@ angular.module('ng-digits')
          * @type {Object}
          */
         var config = angular.copy(ngDigitsConfig);
-        if(angular.isObject($scope.ngDigitsFormatter)) {
-          angular.extend(config, $scope.ngDigitsFormatter);
+        if(angular.isObject($scope.ngDigits)) {
+          angular.extend(config, $scope.ngDigits);
         }
 
         /**
@@ -39,10 +39,20 @@ angular.module('ng-digits')
         });
 
         /**
+         * Setting onPaste event handler
+         * @todo
+         */
+        // iElm.on('paste', function(event){
+        //   ngModel.$setViewValue(ngDigitsMainHelper.getStringForInput(ngModel.$viewValue, config));
+        //   ngModel.$render();
+        //   event.preventDefault();
+        // });
+
+        /**
          * Setting onKeyPress event handler
          */
         iElm.on('keypress', function(event){
-          return ngDigitsEventHandler.keyPress(event, config);
+          return ngDigitsEventHandler.keyPress(event, config, ngModel.$viewValue);
         });
       }
     };
