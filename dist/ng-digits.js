@@ -138,63 +138,68 @@ angular.module('ng-digits')
   }]);
 angular.module('ng-digits')
   .directive('ngDigits', ['ngDigitsFormatter', 'ngDigitsParser', 'ngDigitsEventHandler', 'ngDigitsConfig', 'ngDigitsMainHelper',
-    function(ngDigitsFormatter, ngDigitsParser, ngDigitsEventHandler, ngDigitsConfig, ngDigitsMainHelper){
-    // Runs during compile
-    return {
-      scope: {
-        ngDigits: '='
-      },
-      require: 'ngModel',
-      restrict: 'A',
-      link: function($scope, iElm, iAttrs, ngModel) {
+    function(ngDigitsFormatter, ngDigitsParser, ngDigitsEventHandler, ngDigitsConfig, ngDigitsMainHelper) {
+      // Runs during compile
+      return {
+        scope: {
+          ngDigits: '='
+        },
+        require: 'ngModel',
+        restrict: 'A',
+        link: function($scope, iElm, iAttrs, ngModel) {
 
-        /**
-         * Configuration for this specific instance of directive
-         * @type {Object}
-         */
-        var config = angular.copy(ngDigitsConfig);
-        if(angular.isObject($scope.ngDigits)) {
-          angular.extend(config, $scope.ngDigits);
+          /**
+           * Configuration for this specific instance of directive
+           * @type {Object}
+           */
+          var config = angular.copy(ngDigitsConfig);
+          if (angular.isObject($scope.ngDigits)) {
+            angular.extend(config, $scope.ngDigits);
+          }
+
+          /**
+           * Settings up $formatter func
+           */
+          ngModel.$formatters.push(function(modelValue) {
+            return ngDigitsFormatter.formatter(modelValue, config);
+          });
+
+          /**
+           * Setting up $parser func
+           */
+          ngModel.$parsers.push(function(inputValue) {
+            return ngDigitsParser.parser(inputValue, config);
+          });
+
+          ngModel.$viewChangeListeners.push(function() {
+            var carretPosition = iElm[0].selectionStart;
+            var initialModelLength = ngModel.$viewValue.length;
+            ngModel.$setViewValue(ngDigitsMainHelper.getStringForInput(ngModel.$viewValue, config));
+            ngModel.$render();
+            // preservind carret position when we type not in the end of input
+            var newSelectionStart = initialModelLength === ngModel.$viewValue.length ? carretPosition : carretPosition + 1;
+            iElm[0].setSelectionRange(newSelectionStart, newSelectionStart);
+          });
+
+          /**
+           * Setting onPaste event handler
+           * @todo
+           */
+          // iElm.on('paste', function(event){
+          //   ngModel.$setViewValue(ngDigitsMainHelper.getStringForInput(ngModel.$viewValue, config));
+          //   ngModel.$render();
+          //   event.preventDefault();
+          // });
+
+          /**
+           * Setting onKeyPress event handler
+           */
+          iElm.on('keypress', function(event) {
+            return ngDigitsEventHandler.keyPress(event, config, ngModel.$viewValue, this);
+          });
         }
-
-        /**
-         * Settings up $formatter func
-         */
-        ngModel.$formatters.push(function(modelValue){
-          return ngDigitsFormatter.formatter(modelValue, config);
-        });
-
-        /**
-         * Setting up $parser func
-         */
-        ngModel.$parsers.push(function(inputValue){
-          return ngDigitsParser.parser(inputValue, config);
-        });
-
-        ngModel.$viewChangeListeners.push(function(){
-          ngModel.$setViewValue(ngDigitsMainHelper.getStringForInput(ngModel.$viewValue, config));
-          ngModel.$render();
-        });
-
-        /**
-         * Setting onPaste event handler
-         * @todo
-         */
-        // iElm.on('paste', function(event){
-        //   ngModel.$setViewValue(ngDigitsMainHelper.getStringForInput(ngModel.$viewValue, config));
-        //   ngModel.$render();
-        //   event.preventDefault();
-        // });
-
-        /**
-         * Setting onKeyPress event handler
-         */
-        iElm.on('keypress', function(event){
-          return ngDigitsEventHandler.keyPress(event, config, ngModel.$viewValue);
-        });
-      }
-    };
-  }]);
+      };
+    }]);
 angular.module('ng-digits')
   .provider('ngDigitsEventHandler', ['$windowProvider', 
     function($windowProvider) {
@@ -210,15 +215,16 @@ angular.module('ng-digits')
      * @param  {Event} event keypress event
      * @param {Object} config directive config
      * @param {String} viewValue current value in input
+     * @param {Object} input dom input element
      * 
      * @return {Boolean}
      */
-    this.keyPress = function(event, config, viewValue) {
+    this.keyPress = function(event, config, viewValue, input) {
       event = event || $windowProvider.$get().event;
       var charCode = angular.isUndefined(event.which) ? event.keyCode : event.which;
       var charStr = String.fromCharCode(charCode);
 
-      if (handler._blockFromTyping(charStr, config, viewValue)) {
+      if (handler._blockFromTyping(charStr, config, viewValue, input)) {
         event.preventDefault();
         return false;
       }
@@ -230,10 +236,11 @@ angular.module('ng-digits')
      * @param  {String} charStr   pressed character
      * @param {Object} config directive config
      * @param {String} viewValue current value in input
+     * @param {Object} input dom input element
      * 
      * @return {Boolean}
      */
-    this._blockFromTyping = function(charStr, config, viewValue) {
+    this._blockFromTyping = function(charStr, config, viewValue, input) {
       // Is this char proper decimal separator (as set in config, and only one in string)
       var isAllowedDecimalSeparator = config.decimalCount > 0 && viewValue.indexOf(config.decimalSeparator) === -1 && charStr === config.decimalSeparator;
 
@@ -243,7 +250,8 @@ angular.module('ng-digits')
 
       // do we have a propoer decimal length
       var viewValueParts = viewValue.split(config.decimalSeparator);
-      if(viewValueParts.length > 1 && viewValueParts[1].length >= config.decimalCount) {
+      var decimalSeparatorPosition = viewValue.indexOf(config.decimalSeparator);
+      if(viewValueParts.length > 1 && viewValueParts[1].length >= config.decimalCount && input.selectionStart > decimalSeparatorPosition) {
         return true;
       }
 
