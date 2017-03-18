@@ -183,13 +183,21 @@ angular.module('ng-digits')
 
           /**
            * Setting onPaste event handler
-           * @todo
            */
-          // iElm.on('paste', function(event){
-          //   ngModel.$setViewValue(ngDigitsMainHelper.getStringForInput(ngModel.$viewValue, config));
-          //   ngModel.$render();
-          //   event.preventDefault();
-          // });
+          iElm.on('paste', function(event){
+            var pastedData = event.clipboardData.getData('Text'); // clipboard text
+            var chars = ngModel.$viewValue.split('');
+            chars.splice(this.selectionStart, this.selectionEnd - this.selectionStart);
+            var leftPart = chars.slice(0, this.selectionStart).join('');
+            var rightPart = chars.slice(this.selectionStart).join('');
+            var newValue = leftPart + pastedData + rightPart; // pasting clipboard into input value
+            ngModel.$setViewValue(ngDigitsMainHelper.getStringForInput(newValue, config));
+            ngModel.$render();
+            // setting up carret position at end of pasted data
+            var newCarretPosition = (leftPart + pastedData).length + 1;
+            iElm[0].setSelectionRange(newCarretPosition, newCarretPosition);
+            event.preventDefault();
+          });
 
           /**
            * Setting onKeyPress event handler
