@@ -33,6 +33,9 @@ angular.module('ng-digits')
             return ngDigitsParser.parser(inputValue, config);
           });
 
+          /**
+           * making sure, that if the viewValue changes, it stays valid
+           */
           ngModel.$viewChangeListeners.push(function() {
             var carretPosition = iElm[0].selectionStart;
             var initialModelLength = ngModel.$viewValue.length;
@@ -47,25 +50,14 @@ angular.module('ng-digits')
            * Setting onPaste event handler
            */
           iElm.on('paste', function(event){
-            var pastedData = event.clipboardData.getData('Text'); // clipboard text
-            var chars = ngModel.$viewValue.split('');
-            chars.splice(this.selectionStart, this.selectionEnd - this.selectionStart);
-            var leftPart = chars.slice(0, this.selectionStart).join('');
-            var rightPart = chars.slice(this.selectionStart).join('');
-            var newValue = leftPart + pastedData + rightPart; // pasting clipboard into input value
-            ngModel.$setViewValue(ngDigitsMainHelper.getStringForInput(newValue, config));
-            ngModel.$render();
-            // setting up carret position at end of pasted data
-            var newCarretPosition = (leftPart + pastedData).length + 1;
-            iElm[0].setSelectionRange(newCarretPosition, newCarretPosition);
-            event.preventDefault();
+            ngDigitsEventHandler.handlePaste(event, config, ngModel, iElm);
           });
 
           /**
            * Setting onKeyPress event handler
            */
           iElm.on('keypress', function(event) {
-            return ngDigitsEventHandler.keyPress(event, config, ngModel.$viewValue, this);
+            return ngDigitsEventHandler.handleKeyPress(event, config, ngModel.$viewValue, this);
           });
         }
       };
