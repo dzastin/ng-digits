@@ -1,6 +1,6 @@
 angular.module('ng-digits')
-  .provider('ngDigitsEventHandler', ['$windowProvider',
-    function($windowProvider) {
+  .provider('ngDigitsEventHandler', ['$windowProvider', 'ngDigitsMainHelperProvider',
+    function($windowProvider, ngDigitsMainHelperProvider) {
 
       /**
        * Handler
@@ -39,6 +39,14 @@ angular.module('ng-digits')
        * @return {Boolean}
        */
       this._blockFromTyping = function(charStr, config, viewValue, input) {
+        viewValue = viewValue + '';
+
+        // let's check, if we encouter min, max or sth like that
+        var potentialNewValue = ngDigitsMainHelperProvider.getValueForModel(viewValue + charStr, config);
+        if(potentialNewValue + '' === viewValue) {
+          return true;
+        }
+
         // Is this char proper decimal separator (as set in config, and only one in string)
         var isAllowedDecimalSeparator = config.decimalCount > 0 && viewValue.indexOf(config.decimalSeparator) === -1 && charStr === config.decimalSeparator;
 
@@ -57,35 +65,35 @@ angular.module('ng-digits')
       };
 
       /**
+       * Handle paste event
+       * @param  {Event} event   paste event
+       * @param {Object} config directive config
+       * @param  {Object} ngModel ngModelCtrl
+       * @param  {Object} input angular.element
+       * @return {undefined}
+       */
+      this.handlePaste = function(event, config, ngModel, input) {
+        input = input[0]; // getting dom element
+        var pastedData = event.clipboardData.getData('Text'); // clipboard text
+        var chars = ngModel.$viewValue.split('');
+        chars.splice(input.selectionStart, input.selectionEnd - input.selectionStart);
+        var leftPart = chars.slice(0, input.selectionStart).join('');
+        var rightPart = chars.slice(input.selectionStart).join('');
+        var newValue = leftPart + pastedData + rightPart; // pasting clipboard into input value
+        ngModel.$setViewValue(ngDigitsMainHelperProvider.getStringForInput(newValue, config));
+        ngModel.$render();
+        // setting up carret position at end of pasted data
+        var newCarretPosition = (leftPart + pastedData).length + 1;
+        input.setSelectionRange(newCarretPosition, newCarretPosition);
+        event.preventDefault();
+      }
+
+      /**
        * This returns value for factory/service
        * @return {Object} handler
        */
-      this.$get = ['ngDigitsMainHelper',
-        function(ngDigitsMainHelper) {
-
-          /**
-           * Handle paste event
-           * @param  {Event} event   paste event
-           * @param {Object} config directive config
-           * @param  {Object} ngModel ngModelCtrl
-           * @param  {Object} input angular.element
-           * @return {undefined}
-           */
-          handler.handlePaste = function(event, config, ngModel, input) {
-            input = input[0]; // getting dom element
-            var pastedData = event.clipboardData.getData('Text'); // clipboard text
-            var chars = ngModel.$viewValue.split('');
-            chars.splice(input.selectionStart, input.selectionEnd - input.selectionStart);
-            var leftPart = chars.slice(0, input.selectionStart).join('');
-            var rightPart = chars.slice(input.selectionStart).join('');
-            var newValue = leftPart + pastedData + rightPart; // pasting clipboard into input value
-            ngModel.$setViewValue(ngDigitsMainHelper.getStringForInput(newValue, config));
-            ngModel.$render();
-            // setting up carret position at end of pasted data
-            var newCarretPosition = (leftPart + pastedData).length + 1;
-            input.setSelectionRange(newCarretPosition, newCarretPosition);
-            event.preventDefault();
-          }
+      this.$get = [
+        function() {
 
           return handler;
         }];

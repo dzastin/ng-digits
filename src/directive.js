@@ -23,14 +23,14 @@ angular.module('ng-digits')
            * Settings up $formatter func
            */
           ngModel.$formatters.push(function(modelValue) {
-            return ngDigitsFormatter.formatter(modelValue, config);
+            return ngDigitsFormatter.formatter(modelValue, config, ngModel);
           });
 
           /**
            * Setting up $parser func
            */
           ngModel.$parsers.push(function(inputValue) {
-            return ngDigitsParser.parser(inputValue, config);
+            return ngDigitsParser.parser(inputValue, config, ngModel);
           });
 
           /**

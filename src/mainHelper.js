@@ -1,5 +1,5 @@
 angular.module('ng-digits')
-  .provider('ngDigitsMainHelper', [function(){
+  .provider('ngDigitsMainHelper', [function() {
     var ngDigitsMainHelper = this;
 
     /**
@@ -13,7 +13,7 @@ angular.module('ng-digits')
       var numberValue = ngDigitsMainHelper.getValueForModel(numberValue, config) + '';
 
       // ensure, that there won't be strings like "null" or "NaN" in input
-      if(isNaN(numberValue) || numberValue === null || numberValue === '') {
+      if (isNaN(numberValue) || numberValue === null || numberValue === '') {
         return '';
       }
 
@@ -45,16 +45,26 @@ angular.module('ng-digits')
       numberValue = numberValue.replace(new RegExp(ngDigitsMainHelper.escapeRegex(config.decimalSeparator), 'g'), '.');
 
       // parsing to number
-      if(config.parseToNumber) {
+      if (config.parseToNumber) {
         numberValue = config.decimalCount > 0 ? parseFloat(numberValue, 10) : parseInt(numberValue, 10);
 
         // roundind to allowed decimalPlaces
         var multiplier = Math.pow(10, config.decimalCount);
-        numberValue = Math.round(numberValue * multiplier)/multiplier;
+        numberValue = Math.round(numberValue * multiplier) / multiplier;
+
+        // validating against min value
+        if (config.minValue !== null && numberValue < config.minValue) {
+          numberValue = config.minValue;
+        }
+
+        // validating against max value
+        if (config.maxValue !== null && numberValue > config.maxValue) {
+          numberValue = config.maxValue;
+        }
       }
 
       // ensure, that there won't be "NaN" in model
-      if(isNaN(numberValue)) {
+      if (isNaN(numberValue)) {
         return null;
       }
 
@@ -74,7 +84,7 @@ angular.module('ng-digits')
      * Getter for factory/service
      * @return {Object} ngDigitsMainHelper
      */
-    this.$get = [function(){
+    this.$get = [function() {
       return ngDigitsMainHelper;
     }];
 

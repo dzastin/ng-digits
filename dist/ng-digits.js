@@ -56,7 +56,7 @@ angular.module('ng-digits', [])
 
   }]);
 angular.module('ng-digits')
-  .provider('ngDigitsMainHelper', [function(){
+  .provider('ngDigitsMainHelper', [function() {
     var ngDigitsMainHelper = this;
 
     /**
@@ -70,7 +70,7 @@ angular.module('ng-digits')
       var numberValue = ngDigitsMainHelper.getValueForModel(numberValue, config) + '';
 
       // ensure, that there won't be strings like "null" or "NaN" in input
-      if(isNaN(numberValue) || numberValue === null || numberValue === '') {
+      if (isNaN(numberValue) || numberValue === null || numberValue === '') {
         return '';
       }
 
@@ -102,16 +102,26 @@ angular.module('ng-digits')
       numberValue = numberValue.replace(new RegExp(ngDigitsMainHelper.escapeRegex(config.decimalSeparator), 'g'), '.');
 
       // parsing to number
-      if(config.parseToNumber) {
+      if (config.parseToNumber) {
         numberValue = config.decimalCount > 0 ? parseFloat(numberValue, 10) : parseInt(numberValue, 10);
 
         // roundind to allowed decimalPlaces
         var multiplier = Math.pow(10, config.decimalCount);
-        numberValue = Math.round(numberValue * multiplier)/multiplier;
+        numberValue = Math.round(numberValue * multiplier) / multiplier;
+
+        // validating against min value
+        if (config.minValue !== null && numberValue < config.minValue) {
+          numberValue = config.minValue;
+        }
+
+        // validating against max value
+        if (config.maxValue !== null && numberValue > config.maxValue) {
+          numberValue = config.maxValue;
+        }
       }
 
       // ensure, that there won't be "NaN" in model
-      if(isNaN(numberValue)) {
+      if (isNaN(numberValue)) {
         return null;
       }
 
@@ -131,7 +141,7 @@ angular.module('ng-digits')
      * Getter for factory/service
      * @return {Object} ngDigitsMainHelper
      */
-    this.$get = [function(){
+    this.$get = [function() {
       return ngDigitsMainHelper;
     }];
 
@@ -161,14 +171,14 @@ angular.module('ng-digits')
            * Settings up $formatter func
            */
           ngModel.$formatters.push(function(modelValue) {
-            return ngDigitsFormatter.formatter(modelValue, config);
+            return ngDigitsFormatter.formatter(modelValue, config, ngModel);
           });
 
           /**
            * Setting up $parser func
            */
           ngModel.$parsers.push(function(inputValue) {
-            return ngDigitsParser.parser(inputValue, config);
+            return ngDigitsParser.parser(inputValue, config, ngModel);
           });
 
           /**
@@ -201,8 +211,8 @@ angular.module('ng-digits')
       };
     }]);
 angular.module('ng-digits')
-  .provider('ngDigitsEventHandler', ['$windowProvider',
-    function($windowProvider) {
+  .provider('ngDigitsEventHandler', ['$windowProvider', 'ngDigitsMainHelperProvider',
+    function($windowProvider, ngDigitsMainHelperProvider) {
 
       /**
        * Handler
@@ -241,6 +251,14 @@ angular.module('ng-digits')
        * @return {Boolean}
        */
       this._blockFromTyping = function(charStr, config, viewValue, input) {
+        viewValue = viewValue + '';
+
+        // let's check, if we encouter min, max or sth like that
+        var potentialNewValue = ngDigitsMainHelperProvider.getValueForModel(viewValue + charStr, config);
+        if(potentialNewValue + '' === viewValue) {
+          return true;
+        }
+
         // Is this char proper decimal separator (as set in config, and only one in string)
         var isAllowedDecimalSeparator = config.decimalCount > 0 && viewValue.indexOf(config.decimalSeparator) === -1 && charStr === config.decimalSeparator;
 
@@ -259,35 +277,35 @@ angular.module('ng-digits')
       };
 
       /**
+       * Handle paste event
+       * @param  {Event} event   paste event
+       * @param {Object} config directive config
+       * @param  {Object} ngModel ngModelCtrl
+       * @param  {Object} input angular.element
+       * @return {undefined}
+       */
+      this.handlePaste = function(event, config, ngModel, input) {
+        input = input[0]; // getting dom element
+        var pastedData = event.clipboardData.getData('Text'); // clipboard text
+        var chars = ngModel.$viewValue.split('');
+        chars.splice(input.selectionStart, input.selectionEnd - input.selectionStart);
+        var leftPart = chars.slice(0, input.selectionStart).join('');
+        var rightPart = chars.slice(input.selectionStart).join('');
+        var newValue = leftPart + pastedData + rightPart; // pasting clipboard into input value
+        ngModel.$setViewValue(ngDigitsMainHelperProvider.getStringForInput(newValue, config));
+        ngModel.$render();
+        // setting up carret position at end of pasted data
+        var newCarretPosition = (leftPart + pastedData).length + 1;
+        input.setSelectionRange(newCarretPosition, newCarretPosition);
+        event.preventDefault();
+      }
+
+      /**
        * This returns value for factory/service
        * @return {Object} handler
        */
-      this.$get = ['ngDigitsMainHelper',
-        function(ngDigitsMainHelper) {
-
-          /**
-           * Handle paste event
-           * @param  {Event} event   paste event
-           * @param {Object} config directive config
-           * @param  {Object} ngModel ngModelCtrl
-           * @param  {Object} input angular.element
-           * @return {undefined}
-           */
-          handler.handlePaste = function(event, config, ngModel, input) {
-            input = input[0]; // getting dom element
-            var pastedData = event.clipboardData.getData('Text'); // clipboard text
-            var chars = ngModel.$viewValue.split('');
-            chars.splice(input.selectionStart, input.selectionEnd - input.selectionStart);
-            var leftPart = chars.slice(0, input.selectionStart).join('');
-            var rightPart = chars.slice(input.selectionStart).join('');
-            var newValue = leftPart + pastedData + rightPart; // pasting clipboard into input value
-            ngModel.$setViewValue(ngDigitsMainHelper.getStringForInput(newValue, config));
-            ngModel.$render();
-            // setting up carret position at end of pasted data
-            var newCarretPosition = (leftPart + pastedData).length + 1;
-            input.setSelectionRange(newCarretPosition, newCarretPosition);
-            event.preventDefault();
-          }
+      this.$get = [
+        function() {
 
           return handler;
         }];
@@ -306,6 +324,7 @@ angular.module('ng-digits')
        * Function passed to $formatters in ngModel
        * @param  {String} modelValue value from ng-model
        * @param {Object} config directive config
+       * @param  {Object} ngModel ngModelCtrl
        * 
        * @return {String} value passed to ng-model
        */
@@ -335,6 +354,7 @@ angular.module('ng-digits')
        * Function passed to $parsers in ngModel
        * @param  {String} inputValue value from DOM
        * @param {Object} config directive config
+       * @param  {Object} ngModel ngModelCtrl
        * 
        * @return {String} value passed to ng-model
        */

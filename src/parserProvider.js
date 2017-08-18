@@ -12,6 +12,7 @@ angular.module('ng-digits')
        * Function passed to $parsers in ngModel
        * @param  {String} inputValue value from DOM
        * @param {Object} config directive config
+       * @param  {Object} ngModel ngModelCtrl
        * 
        * @return {String} value passed to ng-model
        */

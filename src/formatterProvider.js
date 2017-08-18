@@ -12,6 +12,7 @@ angular.module('ng-digits')
        * Function passed to $formatters in ngModel
        * @param  {String} modelValue value from ng-model
        * @param {Object} config directive config
+       * @param  {Object} ngModel ngModelCtrl
        * 
        * @return {String} value passed to ng-model
        */
