@@ -40,29 +40,39 @@ angular.module('ng-digits')
        */
       this._blockFromTyping = function(charStr, config, viewValue, input) {
         viewValue = viewValue + '';
+        var potentialNewViewValue = handler._getPotentialViewValue(charStr, viewValue, input); // potential value in input
+        var potentialNewValue = ngDigitsMainHelperProvider.getValueForModel(potentialNewViewValue, config); // potential value in model
+        var potentialNewViewValueSimplyParsed = potentialNewViewValue
+          .replace(new RegExp(ngDigitsMainHelperProvider.escapeRegex(config.thousandsSeparator), 'g'), '') // removing thousand separators from potential value in input
+          .replace(new RegExp(ngDigitsMainHelperProvider.escapeRegex(config.decimalSeparator), 'g'), '.'); // replacing decimal separators in potential value in input
 
-        // let's check, if we encouter min, max or sth like that
-        var potentialNewValue = ngDigitsMainHelperProvider.getValueForModel(viewValue + charStr, config);
-        if(potentialNewValue + '' === viewValue) {
-          return true;
+        // first char is for negative value, so we accept it
+        if(config.minValue < 0 && viewValue === '' && charStr === '-') {
+          return false;
         }
 
-        // Is this char proper decimal separator (as set in config, and only one in string)
-        var isAllowedDecimalSeparator = config.decimalCount > 0 && viewValue.indexOf(config.decimalSeparator) === -1 && charStr === config.decimalSeparator;
-
-        if (!isAllowedDecimalSeparator && !(/\d/.test(charStr))) {
-          return true;
-        }
-
-        // do we have a propoer decimal length
-        var viewValueParts = viewValue.split(config.decimalSeparator);
-        var decimalSeparatorPosition = viewValue.indexOf(config.decimalSeparator);
-        if (viewValueParts.length > 1 && viewValueParts[1].length >= config.decimalCount && input.selectionStart > decimalSeparatorPosition) {
+        // checking if potential view value in input is the same as potential value in model
+        // except for the decimal separator at the end of string, so we can still type
+        // numbers like 34, (resulting 34 in model)
+        if(potentialNewValue + '' !== potentialNewViewValueSimplyParsed && potentialNewViewValueSimplyParsed.indexOf('.') !== potentialNewViewValueSimplyParsed.length -1) {
           return true;
         }
 
         return false;
       };
+
+      /**
+       * Return potentian new input value
+       * @param  {Srtring} charStr   char in input
+       * @param  {String} viewValue current value in input
+       * @param  {DomElem} input     dom input element
+       * @return {String} potential new input value
+       */
+      this._getPotentialViewValue = function(charStr, viewValue, input) {
+        var viewValueParts = viewValue.split('');
+        viewValueParts.splice(input.selectionStart, 0,charStr);
+        return viewValueParts.join('');
+      }
 
       /**
        * Handle paste event

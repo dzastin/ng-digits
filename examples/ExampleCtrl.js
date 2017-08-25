@@ -4,6 +4,7 @@ angular.module('example', [
     function($scope){
       $scope.testModel = 4567.45;
       $scope.testModel2 = 54;
+      $scope.testModel3 = 0;
 
       /**
        * float, max 2 decimal digits, 2 decimals precision
@@ -20,6 +21,15 @@ angular.module('example', [
        */
       $scope.options2 = {
         maxValue: 100,
+        minValue: -9
+      }
+
+      /**
+       * percentage value without decimals
+       * @type {Object}
+       */
+      $scope.options3 = {
+        maxValue: 500,
         minValue: 0
       }
   }]);
