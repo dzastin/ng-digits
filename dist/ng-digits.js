@@ -92,6 +92,9 @@ angular.module('ng-digits')
      * @return {String|Number}             string or number based on config
      */
     this.getValueForModel = function(numberValue, config) {
+      // getting leading zeros
+      var leadingZeros = ngDigitsMainHelper._getLeadingZeros(numberValue);
+
       // ensuring, that numberValue is String
       numberValue = angular.isDefined(numberValue) ? numberValue + '' : '';
 
@@ -102,26 +105,37 @@ angular.module('ng-digits')
       numberValue = numberValue.replace(new RegExp(ngDigitsMainHelper.escapeRegex(config.decimalSeparator), 'g'), '.');
 
       // parsing to number
-      if (config.parseToNumber) {
-        numberValue = config.decimalCount > 0 ? parseFloat(numberValue, 10) : parseInt(numberValue, 10);
+      numberValue = config.decimalCount > 0 ? parseFloat(numberValue, 10) : parseInt(numberValue, 10);
 
-        // roundind to allowed decimalPlaces
-        var multiplier = Math.pow(10, config.decimalCount);
-        numberValue = Math.round(numberValue * multiplier) / multiplier;
+      // roundind to allowed decimalPlaces
+      var multiplier = Math.pow(10, config.decimalCount);
+      numberValue = Math.round(numberValue * multiplier) / multiplier;
 
-        // validating against min value
-        if (config.minValue !== null && numberValue < config.minValue) {
-          numberValue = config.minValue;
-        }
-
-        // validating against max value
-        if (config.maxValue !== null && numberValue > config.maxValue) {
-          numberValue = config.maxValue;
-        }
-      } else if (!config.allowedLeadingZeros) {
-        // '005' => '5'
-        numberValue = parseFloat(numberValue) + '';
+      // validating against min value
+      if (config.minValue !== null && numberValue < config.minValue) {
+        numberValue = config.minValue;
       }
+
+      // validating against max value
+      if (config.maxValue !== null && numberValue > config.maxValue) {
+        numberValue = config.maxValue;
+      }
+
+      // we transorm value back to string, if that's dev's wish
+      if (!config.parseToNumber) {
+        numberValue += '';
+
+        // recovering leading zeros
+        if (config.allowedLeadingZeros) {
+          // '005' => '5'
+          if(numberValue === '0') {
+            numberValue = leadingZeros;
+          } else {
+            numberValue = leadingZeros + numberValue;
+          }
+        }
+      }
+      
 
       // ensure, that there won't be "NaN" in model
       if (isNaN(numberValue)) {
@@ -130,6 +144,27 @@ angular.module('ng-digits')
 
       return numberValue;
     };
+
+    /**
+     * Return leading zeros of number
+     * @param  {String} numberValue numberValue
+     * @return {Sring} leading zeros
+     */
+    this._getLeadingZeros = function(numberValue){
+      var leadingZeros = '';
+      var stillZeros = true;
+      numberValue += '';
+      for(var i = 0; i < numberValue.length; i++) {
+        if(numberValue[i] !== '0') {
+          stillZeros = false;
+        }
+        if(stillZeros) {
+          leadingZeros += '0';
+        }
+      }
+
+      return leadingZeros;
+    }
 
     /**
      * Returns escaped regexp string (for new RegExp func)

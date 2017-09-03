@@ -4,7 +4,6 @@ angular.module('example', [
     function($scope){
       $scope.testModel = 4567.45;
       $scope.testModel2 = 54;
-      $scope.testModel3 = 0;
       $scope.testModel4 = '34';
       $scope.testModel5 = '067';
 
@@ -23,20 +22,11 @@ angular.module('example', [
        */
       $scope.options2 = {
         maxValue: 100,
-        minValue: -9
-      };
-
-      /**
-       * percentage value without decimals
-       * @type {Object}
-       */
-      $scope.options3 = {
-        maxValue: 500,
         minValue: 0
       };
 
       /**
-       * percentage value without decimals
+       * min 0, max 500, as string
        * @type {Object}
        */
       $scope.options4 = {
@@ -46,15 +36,15 @@ angular.module('example', [
       };
 
       /**
-       * percentage value without decimals
+       * min 0, max 50000, as string, allow leading zeros, 
        * @type {Object}
        */
       $scope.options5 = {
-        maxValue: 500,
+        maxValue: 50000,
         minValue: 0,
         parseToNumber: false,
         allowedLeadingZeros: true,
-        thousandsSeparator: '\''
+        thousandsSeparator: ''
       };
 
       $scope.type = function(model){

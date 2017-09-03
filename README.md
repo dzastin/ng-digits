@@ -3,7 +3,7 @@
 > Why another directive for numbers? Because I didn't find any one, that has all of this:
 
 * written purely in angular 1.x
-* you can extend almost everything (no inaccessible vars, many providers, that can be modified in config phase)
+* you can extend almost everything (no inaccessible vars, many providers that can be modified in config phase)
 * option for leaving number as string and have leading zeros (like in policy or document numbers)
 
 > Usage is very simple, just create options and set directive
