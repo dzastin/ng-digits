@@ -1,0 +1,34 @@
+{
+  "name": "ng-digits",
+  "version": "1.0.0",
+  "description": "Angular directive allowing only digits in input",
+  "main": "dist/ng-digits.min.js",
+  "authors": [
+    "Dzastin"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "digits",
+    "number",
+    "input",
+    "angular",
+    "only-digits",
+    "only-numbers",
+    "ng-digits",
+    "digits",
+    "numbers",
+    "numeric",
+    "int",
+    "float"
+  ],
+  "homepage": "https://github.com/dzastin/ng-digits",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "devDependencies": {},
+  "dependencies": {}
+}
