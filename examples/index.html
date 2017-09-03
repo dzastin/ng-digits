@@ -12,14 +12,22 @@
     <body >
         test
         <input type="text" ng-model="testModel" ng-digits="options1" />
-        ng-model: {{testModel}}
+        ng-model: {{testModel}} {{type(testModel)}}
         <br/>
         test 2
         <input type="text" ng-model="testModel2" ng-digits="options2" />
-        ng-model: {{testModel2}}
+        ng-model: {{testModel2}} {{type(testModel2)}}
         <br/>
         test 3
         <input type="text" ng-model="testModel3" ng-digits="options3" />
-        ng-model: {{testModel3}}
+        ng-model: {{testModel3}} {{type(testModel3)}}
+        <br/>
+        test 4
+        <input type="text" ng-model="testModel4" ng-digits="options4" />
+        ng-model: {{testModel4}} {{type(testModel4)}}
+        <br/>
+        test 5
+        <input type="text" ng-model="testModel5" ng-digits="options5" />
+        ng-model: {{testModel5}} {{type(testModel5)}}
     </body>
 </html>

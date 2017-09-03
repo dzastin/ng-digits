@@ -61,6 +61,9 @@ angular.module('ng-digits')
         if (config.maxValue !== null && numberValue > config.maxValue) {
           numberValue = config.maxValue;
         }
+      } else if (!config.allowedLeadingZeros) {
+        // '005' => '5'
+        numberValue = parseFloat(numberValue) + '';
       }
 
       // ensure, that there won't be "NaN" in model

@@ -118,6 +118,9 @@ angular.module('ng-digits')
         if (config.maxValue !== null && numberValue > config.maxValue) {
           numberValue = config.maxValue;
         }
+      } else if (!config.allowedLeadingZeros) {
+        // '005' => '5'
+        numberValue = parseFloat(numberValue) + '';
       }
 
       // ensure, that there won't be "NaN" in model
@@ -257,6 +260,11 @@ angular.module('ng-digits')
         var potentialNewViewValueSimplyParsed = potentialNewViewValue
           .replace(new RegExp(ngDigitsMainHelperProvider.escapeRegex(config.thousandsSeparator), 'g'), '') // removing thousand separators from potential value in input
           .replace(new RegExp(ngDigitsMainHelperProvider.escapeRegex(config.decimalSeparator), 'g'), '.'); // replacing decimal separators in potential value in input
+
+        // dont accept thousandsSeparator or spaces
+        if(charStr === config.thousandsSeparator || charStr === ' ') {
+          return true;
+        }
 
         // first char is for negative value, so we accept it
         if(config.minValue < 0 && viewValue === '' && charStr === '-') {

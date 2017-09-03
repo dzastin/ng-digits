@@ -46,6 +46,11 @@ angular.module('ng-digits')
           .replace(new RegExp(ngDigitsMainHelperProvider.escapeRegex(config.thousandsSeparator), 'g'), '') // removing thousand separators from potential value in input
           .replace(new RegExp(ngDigitsMainHelperProvider.escapeRegex(config.decimalSeparator), 'g'), '.'); // replacing decimal separators in potential value in input
 
+        // dont accept thousandsSeparator or spaces
+        if(charStr === config.thousandsSeparator || charStr === ' ') {
+          return true;
+        }
+
         // first char is for negative value, so we accept it
         if(config.minValue < 0 && viewValue === '' && charStr === '-') {
           return false;
