@@ -272,6 +272,12 @@ angular.module('ng-digits')
         var charCode = angular.isUndefined(event.which) ? event.keyCode : event.which;
         var charStr = String.fromCharCode(charCode);
 
+        // testing for non printable characters like backspace
+        if(/[\x00-\x1F]/.test(charStr)) {
+          return true;
+        }
+
+        // testing for other characters
         if (handler._blockFromTyping(charStr, config, viewValue, input)) {
           event.preventDefault();
           return false;
