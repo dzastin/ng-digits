@@ -62,6 +62,11 @@ angular.module('ng-digits')
           return false;
         }
 
+        // preventing from typing decimal separator for non float values
+        if(charStr === config.decimalSeparator && !config.decimalCount) {
+          return true;
+        }
+
         // checking if potential view value in input is the same as potential value in model
         // except for the decimal separator at the end of string, so we can still type
         // numbers like 34, (resulting 34 in model)
