@@ -100,7 +100,11 @@ angular.module('ng-digits')
        */
       this.handlePaste = function(event, config, ngModel, input) {
         input = input[0]; // getting dom element
-        var pastedData = event.clipboardData.getData('Text'); // clipboard text
+        var clipboardData = event.clipboardData;
+        if(!clipboardData && event.originalEvent) {
+          clipboardData = event.originalEvent.clipboardData;
+        }
+        var pastedData = clipboardData.getData('Text'); // clipboard text
         var chars = ngModel.$viewValue.split('');
         chars.splice(input.selectionStart, input.selectionEnd - input.selectionStart);
         var leftPart = chars.slice(0, input.selectionStart).join('');
