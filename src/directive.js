@@ -15,9 +15,23 @@ angular.module('ng-digits')
            * @type {Object}
            */
           var config = angular.copy(ngDigitsConfig);
-          if (angular.isObject($scope.ngDigits)) {
-            angular.extend(config, $scope.ngDigits);
-          }
+
+          /**
+           * Config regeneration
+           * @param  {Object} ngDigits 
+           * @return {undefined}
+           */
+          this._regenerateConfig = function(ngDigits) {
+            if (ngDigits && angular.isObject(ngDigits)) {
+              angular.extend(config, ngDigits);
+            }
+          };
+
+
+          /** watching for changes in config */
+          this._regenerateConfig($scope.ngDigits);
+          $scope.$watch('ngDigits', this._regenerateConfig, true);
+
 
           /**
            * Settings up $formatter func
