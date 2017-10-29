@@ -58,7 +58,7 @@ angular.module('ng-digits')
         }
 
         // first char is for negative value, so we accept it
-        if(config.minValue < 0 && viewValue === '' && charStr === '-') {
+        if((config.minValue === null || config.minValue < 0) && (angular.isUndefined(viewValue) || viewValue === '') && charStr === '-') {
           return false;
         }
 

@@ -9,6 +9,12 @@ angular.module('ng-digits')
      * @return {String} formatted number string
      */
     this.getStringForInput = function(numberValue, config) {
+
+      // allowing negative number char
+      if((config.minValue === null || config.minValue < 0) && numberValue === '-') {
+        return '-';
+      }
+
       // ensuring, that we have clean string model
       var numberValue = ngDigitsMainHelper.getValueForModel(numberValue, config) + '';
 
