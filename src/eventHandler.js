@@ -23,7 +23,7 @@ angular.module('ng-digits')
         var charStr = String.fromCharCode(charCode);
 
         // cmd or ctrl btns - fixes problem with keyboard pasting on firefox
-        if(event.metaKey) {
+        if(event.metaKey || event.ctrlKey) {
           return true;
         }
 
