@@ -22,6 +22,11 @@ angular.module('ng-digits')
         var charCode = angular.isUndefined(event.which) ? event.keyCode : event.which;
         var charStr = String.fromCharCode(charCode);
 
+        // cmd or ctrl btns - fixes problem with keyboard pasting on firefox
+        if(event.metaKey) {
+          return true;
+        }
+
         // testing for non printable characters like backspace
         if(/[\x00-\x1F]/.test(charStr)) {
           return true;
