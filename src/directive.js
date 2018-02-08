@@ -73,6 +73,19 @@ angular.module('ng-digits')
           iElm.on('keypress', function(event) {
             return ngDigitsEventHandler.handleKeyPress(event, config, ngModel.$viewValue, this);
           });
+
+          /**
+           * Setting up custom event handlers from config
+           */
+          if(angular.isObject(config.eventHandlers) && config.eventHandlers) {
+            angular.forEach(config.eventHandlers, function(eventHandler, eventCode){
+              if(angular.isFunction(eventHandler)){
+                iElm.on(eventCode, function(event){
+                  eventHandler(event, config, ngModel, this);
+                });
+              }
+            });
+          }
         }
       };
     }]);

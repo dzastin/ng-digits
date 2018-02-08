@@ -46,6 +46,25 @@ angular.module('ng-digits', [])
     this.allowedLeadingZeros = false;
 
     /**
+     * Structure of this object:
+     * {
+     *     inputevent: fn()
+     * }
+     * 
+     * for example: 
+     * {
+     *     keydown: function(event, ngDigitsConfig, ngModelCtrl, eventThis){ // all passed arguments
+     *         console.log(event)
+     *     }
+     * }
+     * 
+     * the return statement of this fn will be returned in original event
+     * 
+     * @type {Object}
+     */
+    this.eventHandlers = {};
+
+    /**
      * Getter for factory/service
      * @return {Object} config
      */
@@ -265,6 +284,19 @@ angular.module('ng-digits')
           iElm.on('keypress', function(event) {
             return ngDigitsEventHandler.handleKeyPress(event, config, ngModel.$viewValue, this);
           });
+
+          /**
+           * Setting up custom event handlers from config
+           */
+          if(angular.isObject(config.eventHandlers) && config.eventHandlers) {
+            angular.forEach(config.eventHandlers, function(eventHandler, eventCode){
+              if(angular.isFunction(eventHandler)){
+                iElm.on(eventCode, function(event){
+                  eventHandler(event, config, ngModel, this);
+                });
+              }
+            });
+          }
         }
       };
     }]);
