@@ -392,6 +392,10 @@ angular.module('ng-digits')
        * @return {String} potential new input value
        */
       this._getPotentialViewValue = function(charStr, viewValue, input) {
+        if(input.selectionEnd - input.selectionStart > 0) {
+          // this is the case when you have some of text selected
+          viewValue = viewValue.substr(0, input.selectionStart) + viewValue.substr(input.selectionEnd);
+        }
         var viewValueParts = viewValue.split('');
         viewValueParts.splice(input.selectionStart, 0,charStr);
         return viewValueParts.join('');
