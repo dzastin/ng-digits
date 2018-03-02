@@ -12,12 +12,12 @@ angular.module('ng-digits')
        * Function passed to $formatters in ngModel
        * @param  {String} modelValue value from ng-model
        * @param {Object} config directive config
-       * @param  {Object} ngModel ngModelCtrl
+       * @param  {Boolean} fullFormat
        * 
        * @return {String} value passed to ng-model
        */
-      this.formatter = function(modelValue, config) {
-        return ngDigitsMainHelperProvider.getStringForInput(modelValue, config);
+      this.formatter = function(modelValue, config, fullFormat) {
+        return ngDigitsMainHelperProvider.getStringForInput(modelValue, config, fullFormat);
       };
 
       /**

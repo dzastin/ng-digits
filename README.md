@@ -47,11 +47,17 @@ $scope.digitsOptions = {
     this.thousandsSeparator = ' ';
 
     /**
-     * Decimal places 
-     * (if > 0, number has type float, otherwise int)
+     * Decimal places (if > 0, number has type float, otherwise int)
      * @type {Number}
      */
     this.decimalCount = 0;
+
+    /**
+     * If we should pad model value to decimalcount
+     * eg. 3.2 => 3.20, 4 => 4,00
+     * @type {Boolean}
+     */
+    this.padToDecimalCount = false;
 
     /**
      * Maximum value for input
@@ -77,7 +83,25 @@ $scope.digitsOptions = {
      * @type {Boolean}
      */
     this.allowedLeadingZeros = false;
-```
 
-> If you like this directive you can support/motivate me by sending something for cider or something ;) 
+    /**
+     * Structure of this object:
+     * {
+     *     inputevent: fn()
+     * }
+     * 
+     * for example: 
+     * {
+     *     keydown: function(event, ngDigitsConfig, ngModelCtrl, eventThis){ // all passed arguments
+     *         console.log(event)
+     *     }
+     * }
+     * 
+     * the return statement of this fn will be returned in original event
+     * 
+     * @type {Object}
+     */
+    this.eventHandlers = {};```
+
+> If you like this directive you can support me by here:
 > https://www.paypal.me/dzastin

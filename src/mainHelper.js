@@ -6,9 +6,11 @@ angular.module('ng-digits')
      * Returns 'pretty' string to paste in dom input
      * @param  {String|Number} numberValue number to parse
      * @param  {Object} config      direcitve config
+     * @param  {Boolean} fullFormat
+     * 
      * @return {String} formatted number string
      */
-    this.getStringForInput = function(numberValue, config) {
+    this.getStringForInput = function(numberValue, config, fullFormat) {
 
       // allowing negative number char
       if((config.minValue === null || config.minValue < 0) && numberValue === '-') {
@@ -30,6 +32,25 @@ angular.module('ng-digits')
 
       // replacing decimal separators
       numberValue = numberValue.replace(new RegExp(ngDigitsMainHelper.escapeRegex('.'), 'g'), config.decimalSeparator);
+
+      // padding zeros
+      if(fullFormat) {
+        var decimalSeparatorIndex = numberValue.indexOf(config.decimalSeparator);
+        if(config.padToDecimalCount) {
+          var toPad = config.decimalCount;
+          if(decimalSeparatorIndex > -1) {
+            toPad = config.decimalCount - numberValue.substr(decimalSeparatorIndex+1).length;
+          } else {
+            numberValue += config.decimalSeparator;
+          }
+          if(toPad > 0) {
+            for(var i = 0; i < toPad; i++) {
+              numberValue += '0';
+            }
+          }
+
+        }
+      }
 
       return numberValue;
     };

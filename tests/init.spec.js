@@ -81,6 +81,13 @@ describe('test', function(){
 
     });
 
+    it('[separators] should allow to type 1234,05', function(){
+
+        element(by.model('models.separators')).clear().sendKeys('1234,05');
+        expect(element(by.model('models.separators')).getAttribute('value')).toContain('1\'234,05');
+
+    });
+
     it('[separators] should accept float values and result number in model', function(){
 
         element(by.model('models.separators')).clear().sendKeys('12345,656');
@@ -103,6 +110,16 @@ describe('test', function(){
         expect(element(by.model('models.separators')).getAttribute('value')).toContain('-5,2');
 
     });
+
+    /** padding */
+
+    // @todo figure out how to prperly test blur event
+    // it('[padding] should padd zeros to decimals', function(){
+
+    //     element(by.model('models.separators')).clear().sendKeys('123.0');
+    //     element(by.model('models.default')).click(); // blur on above
+    //     expect(element(by.model('models.separators')).getAttribute('value')).toContain('123,00');
+    // }); 
 
     /** min max */
 

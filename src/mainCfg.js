@@ -21,6 +21,13 @@ angular.module('ng-digits', [])
     this.decimalCount = 0;
 
     /**
+     * If we should pad model value to decimalcount
+     * eg. 3.2 => 3.20, 4 => 4,00
+     * @type {Boolean}
+     */
+    this.padToDecimalCount = false;
+
+    /**
      * Maximum value for input
      * @type {Number|null}
      */

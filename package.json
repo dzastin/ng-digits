@@ -1,6 +1,6 @@
 {
   "name": "ng-digits",
-  "version": "1.0.10",
+  "version": "1.0.11",
   "description": "Angular directive allowing only digits in input",
   "main": "index.js",
   "scripts": {

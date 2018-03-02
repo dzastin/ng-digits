@@ -74,9 +74,26 @@ angular.module('ng-digits')
 
         // checking if potential view value in input is the same as potential value in model
         // except for the decimal separator at the end of string, so we can still type
-        // numbers like 34, (resulting 34 in model)
+        // numbers like 34, or 34,0 (resulting 34 in model)
         if(potentialNewValue + '' !== potentialNewViewValueSimplyParsed && potentialNewViewValueSimplyParsed.indexOf('.') !== potentialNewViewValueSimplyParsed.length -1) {
-          return true;
+          if(potentialNewViewValueSimplyParsed.indexOf('.') === -1) {
+            return true;
+          }
+
+          // zeros
+          var paddedZeros = potentialNewViewValueSimplyParsed.split('.')[1];
+          var onlyZeros = true;
+          angular.forEach(paddedZeros, function(paddedZero){
+            if(paddedZero !== '0') {
+              onlyZeros = false;
+            }
+          });
+
+          if(!onlyZeros) {
+            return true;
+          } else if(onlyZeros && paddedZeros && paddedZeros.length > config.decimalCount) {
+            return true;
+          }
         }
 
         return false;

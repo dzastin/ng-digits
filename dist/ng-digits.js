@@ -21,6 +21,13 @@ angular.module('ng-digits', [])
     this.decimalCount = 0;
 
     /**
+     * If we should pad model value to decimalcount
+     * eg. 3.2 => 3.20, 4 => 4,00
+     * @type {Boolean}
+     */
+    this.padToDecimalCount = false;
+
+    /**
      * Maximum value for input
      * @type {Number|null}
      */
@@ -82,9 +89,11 @@ angular.module('ng-digits')
      * Returns 'pretty' string to paste in dom input
      * @param  {String|Number} numberValue number to parse
      * @param  {Object} config      direcitve config
+     * @param  {Boolean} fullFormat
+     * 
      * @return {String} formatted number string
      */
-    this.getStringForInput = function(numberValue, config) {
+    this.getStringForInput = function(numberValue, config, fullFormat) {
 
       // allowing negative number char
       if((config.minValue === null || config.minValue < 0) && numberValue === '-') {
@@ -106,6 +115,25 @@ angular.module('ng-digits')
 
       // replacing decimal separators
       numberValue = numberValue.replace(new RegExp(ngDigitsMainHelper.escapeRegex('.'), 'g'), config.decimalSeparator);
+
+      // padding zeros
+      if(fullFormat) {
+        var decimalSeparatorIndex = numberValue.indexOf(config.decimalSeparator);
+        if(config.padToDecimalCount) {
+          var toPad = config.decimalCount;
+          if(decimalSeparatorIndex > -1) {
+            toPad = config.decimalCount - numberValue.substr(decimalSeparatorIndex+1).length;
+          } else {
+            numberValue += config.decimalSeparator;
+          }
+          if(toPad > 0) {
+            for(var i = 0; i < toPad; i++) {
+              numberValue += '0';
+            }
+          }
+
+        }
+      }
 
       return numberValue;
     };
@@ -248,7 +276,7 @@ angular.module('ng-digits')
            * Settings up $formatter func
            */
           ngModel.$formatters.push(function(modelValue) {
-            return ngDigitsFormatter.formatter(modelValue, config, ngModel);
+            return ngDigitsFormatter.formatter(modelValue, config, true);
           });
 
           /**
@@ -283,6 +311,15 @@ angular.module('ng-digits')
            */
           iElm.on('keypress', function(event) {
             return ngDigitsEventHandler.handleKeyPress(event, config, ngModel.$viewValue, this);
+          });
+
+          /**
+           * Setting blur event handler
+           */
+          iElm.on('blur', function() {
+            var blurredValue = ngDigitsMainHelper.getStringForInput(ngModel.$modelValue, config, true);
+            ngModel.$setViewValue(blurredValue);
+            ngModel.$render();
           });
 
           /**
@@ -376,9 +413,26 @@ angular.module('ng-digits')
 
         // checking if potential view value in input is the same as potential value in model
         // except for the decimal separator at the end of string, so we can still type
-        // numbers like 34, (resulting 34 in model)
+        // numbers like 34, or 34,0 (resulting 34 in model)
         if(potentialNewValue + '' !== potentialNewViewValueSimplyParsed && potentialNewViewValueSimplyParsed.indexOf('.') !== potentialNewViewValueSimplyParsed.length -1) {
-          return true;
+          if(potentialNewViewValueSimplyParsed.indexOf('.') === -1) {
+            return true;
+          }
+
+          // zeros
+          var paddedZeros = potentialNewViewValueSimplyParsed.split('.')[1];
+          var onlyZeros = true;
+          angular.forEach(paddedZeros, function(paddedZero){
+            if(paddedZero !== '0') {
+              onlyZeros = false;
+            }
+          });
+
+          if(!onlyZeros) {
+            return true;
+          } else if(onlyZeros && paddedZeros && paddedZeros.length > config.decimalCount) {
+            return true;
+          }
         }
 
         return false;
@@ -453,12 +507,12 @@ angular.module('ng-digits')
        * Function passed to $formatters in ngModel
        * @param  {String} modelValue value from ng-model
        * @param {Object} config directive config
-       * @param  {Object} ngModel ngModelCtrl
+       * @param  {Boolean} fullFormat
        * 
        * @return {String} value passed to ng-model
        */
-      this.formatter = function(modelValue, config) {
-        return ngDigitsMainHelperProvider.getStringForInput(modelValue, config);
+      this.formatter = function(modelValue, config, fullFormat) {
+        return ngDigitsMainHelperProvider.getStringForInput(modelValue, config, fullFormat);
       };
 
       /**

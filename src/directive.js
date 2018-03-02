@@ -37,7 +37,7 @@ angular.module('ng-digits')
            * Settings up $formatter func
            */
           ngModel.$formatters.push(function(modelValue) {
-            return ngDigitsFormatter.formatter(modelValue, config, ngModel);
+            return ngDigitsFormatter.formatter(modelValue, config, true);
           });
 
           /**
@@ -72,6 +72,15 @@ angular.module('ng-digits')
            */
           iElm.on('keypress', function(event) {
             return ngDigitsEventHandler.handleKeyPress(event, config, ngModel.$viewValue, this);
+          });
+
+          /**
+           * Setting blur event handler
+           */
+          iElm.on('blur', function() {
+            var blurredValue = ngDigitsMainHelper.getStringForInput(ngModel.$modelValue, config, true);
+            ngModel.$setViewValue(blurredValue);
+            ngModel.$render();
           });
 
           /**

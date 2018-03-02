@@ -2,7 +2,7 @@ angular.module('example', [
   'ng-digits'
   ]).controller('ExampleCtrl', ['$scope',
     function($scope){
-      $scope.testModel = 4567.45;
+      $scope.testModel = 4567.4;
       $scope.testModel2 = 54;
       $scope.testModel4 = '34';
       $scope.testModel5 = '067';
@@ -13,7 +13,8 @@ angular.module('example', [
        */
       $scope.options1 = {
         decimalSeparator: ',',
-        decimalCount: 2
+        decimalCount: 2,
+        padToDecimalCount: true
       };
 
       /**
