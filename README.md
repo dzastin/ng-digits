@@ -101,7 +101,8 @@ $scope.digitsOptions = {
      * 
      * @type {Object}
      */
-    this.eventHandlers = {};```
+    this.eventHandlers = {};
+```
 
 > If you like this directive you can support me by here:
 > https://www.paypal.me/dzastin
