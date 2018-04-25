@@ -77,7 +77,5 @@ module.exports = function(grunt) {
     grunt.config('eslint.all.src', [filepath]);
   });
 
-  // Default task(s).
-  grunt.registerTask('default', ['uglify']);
 
 };

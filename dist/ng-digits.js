@@ -541,8 +541,16 @@ angular.module('ng-digits')
        * 
        * @return {String} value passed to ng-model
        */
-      this.parser = function(inputValue, config) {
-        return ngDigitsMainHelperProvider.getValueForModel(inputValue, config);
+      this.parser = function(inputValue, config, ngModelCtrl) {
+        var simulationConfig = angular.copy(config);
+        simulationConfig.maxValue = null;
+        simulationConfig.parseToNumber = true;
+        var simulationValue = ngDigitsMainHelperProvider.getValueForModel(inputValue, simulationConfig);
+        if(config.maxValue !== null && parseFloat(simulationValue) > config.maxValue) {
+          return ngModelCtrl.$modelValue;
+        } else {
+          return ngDigitsMainHelperProvider.getValueForModel(inputValue, config);
+        }
       };
 
       /**
