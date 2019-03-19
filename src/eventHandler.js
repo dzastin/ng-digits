@@ -62,6 +62,25 @@ angular.module('ng-digits')
           return true;
         }
 
+        // don't allow multiple decimal separators
+        var hasMultipleDecimalSeparators = (viewValue.match(new RegExp(ngDigitsMainHelperProvider.escapeRegex(config.decimalSeparator), 'g')) || []).length > 0;
+        if(charStr === config.decimalSeparator && viewValue.indexOf(config.decimalSeparator) && hasMultipleDecimalSeparators) {
+          return true;
+        }
+
+        var isWrongChar = isNaN(charStr) && charStr !== config.decimalSeparator;
+        var isProperNegativeChar = charStr === '-' && viewValue === '';
+        if(isWrongChar && !isProperNegativeChar) {
+          return true;
+        }
+
+        // var sameStringLength = (config.minValue + '').length === potentialNewViewValueSimplyParsed.length;
+        var belowMinimum = config.minValue && parseFloat(potentialNewViewValueSimplyParsed, 10) < config.minValue;
+        var belowZero = parseFloat(potentialNewViewValueSimplyParsed, 10) < 0;
+        if(belowMinimum && potentialNewValue === null && !isNaN(potentialNewViewValueSimplyParsed) && !belowZero) {
+          return false;
+        }
+
         // first char is for negative value, so we accept it
         if((config.minValue === null || config.minValue < 0) && (angular.isUndefined(viewValue) || viewValue === '') && charStr === '-') {
           return false;

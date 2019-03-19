@@ -8,7 +8,9 @@ angular.module('testCases', [
        * test case models
        * @type {Object}
        */
-      $scope.models = {};
+      $scope.models = {
+        nullBug: null
+      };
 
       $scope.options = {
         default: {},
@@ -33,6 +35,11 @@ angular.module('testCases', [
           parseToNumber: false,
           allowedLeadingZeros: true,
           thousandsSeparator: '',
+        },
+        nullBug: {
+          maxValue: 5000,
+          minValue: 1000,
+          decimalCount: 0
         }
       };
 

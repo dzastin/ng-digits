@@ -77,7 +77,7 @@ describe('test', function(){
     it('[separators] should accept float values', function(){
 
         element(by.model('models.separators')).clear().sendKeys('1234.5');
-        expect(element(by.model('models.separators')).getAttribute('value')).toContain('1\'234,5');
+        expect(element(by.model('models.separators')).getAttribute('value')).toContain('12\'345');
 
     });
 
@@ -165,6 +165,18 @@ describe('test', function(){
         element(by.model('models.leading')).clear().sendKeys('000123');
         element(by.model('models.leading')).evaluate('models.leading').then(function(value) {
             expect(value).toBe('000123');
+        });
+
+    });
+
+    /** initial model is null */
+
+    it('[nullModel] should allow to type values', function(){
+
+        element(by.model('models.nullBug')).clear().sendKeys('1');
+        expect(element(by.model('models.nullBug')).getAttribute('value')).toContain('1');
+        element(by.model('models.nullBug')).evaluate('models.nullBug').then(function(value) {
+            expect(value).toBe(null);
         });
 
     });

@@ -166,12 +166,12 @@ angular.module('ng-digits')
 
       // validating against min value
       if (config.minValue !== null && numberValue < config.minValue) {
-        numberValue = config.minValue;
+        numberValue = null;
       }
 
       // validating against max value
       if (config.maxValue !== null && numberValue > config.maxValue) {
-        numberValue = config.maxValue;
+        numberValue = null;
       }
 
       // we transorm value back to string, if that's dev's wish
@@ -399,6 +399,25 @@ angular.module('ng-digits')
         // dont accept thousandsSeparator or spaces
         if(charStr === config.thousandsSeparator || charStr === ' ') {
           return true;
+        }
+
+        // don't allow multiple decimal separators
+        var hasMultipleDecimalSeparators = (viewValue.match(new RegExp(ngDigitsMainHelperProvider.escapeRegex(config.decimalSeparator), 'g')) || []).length > 0;
+        if(charStr === config.decimalSeparator && viewValue.indexOf(config.decimalSeparator) && hasMultipleDecimalSeparators) {
+          return true;
+        }
+
+        var isWrongChar = isNaN(charStr) && charStr !== config.decimalSeparator;
+        var isProperNegativeChar = charStr === '-' && viewValue === '';
+        if(isWrongChar && !isProperNegativeChar) {
+          return true;
+        }
+
+        // var sameStringLength = (config.minValue + '').length === potentialNewViewValueSimplyParsed.length;
+        var belowMinimum = config.minValue && parseFloat(potentialNewViewValueSimplyParsed, 10) < config.minValue;
+        var belowZero = parseFloat(potentialNewViewValueSimplyParsed, 10) < 0;
+        if(belowMinimum && potentialNewValue === null && !isNaN(potentialNewViewValueSimplyParsed) && !belowZero) {
+          return false;
         }
 
         // first char is for negative value, so we accept it
